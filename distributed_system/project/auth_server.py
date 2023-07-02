@@ -1,7 +1,6 @@
 # create a auth server to handle the authentication
 # and authorization of the user
 
-import json
 import socket
 import threading
 

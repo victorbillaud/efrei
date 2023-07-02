@@ -5,8 +5,11 @@ import threading
 
 class Node:
     def __init__(self, host, port, total_nodes, node_id, username, password):
+        # Socket initialization
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((host, port))
+
+        # Vector clock initialization
         self.vector_clock = [0] * total_nodes
         self.buffer = []
         self.node_id = node_id
@@ -25,6 +28,7 @@ class Node:
         self.nodes.append(addr)
 
     def broadcast_message(self, message):
+        # send the message to all nodes
         self.vector_clock[self.node_id] += 1
         message = str(self.vector_clock) + "|" + message
         for node in self.nodes:
@@ -46,9 +50,10 @@ class Node:
             if len(split_message) == 2 and self.is_valid_vector_clock(split_message[0]):
                 vector_clock, message = split_message
                 self.update_vector_clock(eval(vector_clock))
-                print("Received message:", message, "from:", addr)
+                print(vector_clock, message)
+                print("\nReceived message:", message, "from:", addr)
             else:
-                print("Received invalid message:", message, "from:", addr)
+                print("\nReceived invalid message:", message, "from:", addr)
 
     def is_valid_vector_clock(self, vector_clock_str):
         try:
@@ -56,7 +61,8 @@ class Node:
             return isinstance(vector_clock, list) and all(
                 isinstance(i, int) for i in vector_clock
             )
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     def update_vector_clock(self, other_clock):
