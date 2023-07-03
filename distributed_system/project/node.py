@@ -31,6 +31,8 @@ class Node:
         # send the message to all nodes
         self.vector_clock[self.node_id] += 1
         message = str(self.vector_clock) + "|" + message
+        print("\nVector clock:", self.vector_clock)
+        print("Broadcasting message:", message)
         for node in self.nodes:
             self.sock.sendto(message.encode(), node)
 
@@ -38,6 +40,8 @@ class Node:
         # send the message to a specific node
         self.vector_clock[self.node_id] += 1
         message = str(self.vector_clock) + "|" + message
+        print("\nVector clock:", self.vector_clock)
+        print("Sending message:", message, "to:", target_node_id)
         try:
             target_node_address = self.nodes[target_node_id]
             self.sock.sendto(message.encode(), target_node_address)
@@ -53,9 +57,11 @@ class Node:
 
             if len(split_message) == 2 and self.is_valid_vector_clock(split_message[0]):
                 vector_clock, message = split_message
+                # update our vector clock
+                self.vector_clock[self.node_id] += 1
                 self.update_vector_clock(eval(vector_clock))
-                print(vector_clock, message)
-                print("\nReceived message:", message, "from:", addr)
+                print("\nVector clock:", self.vector_clock)
+                print("Received message:", message, "from:", addr)
             else:
                 print("\nReceived invalid message:", message, "from:", addr)
 
