@@ -14,6 +14,7 @@ class Node:
         self.buffer = []
         self.node_id = node_id
         self.nodes = []  # List to keep track of other nodes
+        self.port = port
 
         auth_server_host = "localhost"
         auth_server_port = 5000
@@ -54,14 +55,20 @@ class Node:
             data, addr = self.sock.recvfrom(1024)
             message = data.decode()
             split_message = message.split("|", 1)
+            incoming_port = addr[1]
 
-            if len(split_message) == 2 and self.is_valid_vector_clock(split_message[0]):
+            if (
+                len(split_message) == 2
+                and self.is_valid_vector_clock(split_message[0])
+                and incoming_port != self.port
+            ):
                 vector_clock, message = split_message
                 # update our vector clock
                 self.vector_clock[self.node_id] += 1
                 self.update_vector_clock(eval(vector_clock))
-                print("\nVector clock:", self.vector_clock)
+
                 print("Received message:", message, "from:", addr)
+                print("\nVector clock:", self.vector_clock)
             else:
                 print("\nReceived invalid message:", message, "from:", addr)
 
