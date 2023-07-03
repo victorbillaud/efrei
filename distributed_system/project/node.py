@@ -35,6 +35,9 @@ class Node:
             self.sock.sendto(message.encode(), node)
 
     def send_private_message(self, target_node_id, message):
+        # send the message to a specific node
+        self.vector_clock[self.node_id] += 1
+        message = str(self.vector_clock) + "|" + message
         try:
             target_node_address = self.nodes[target_node_id]
             self.sock.sendto(message.encode(), target_node_address)
@@ -42,6 +45,7 @@ class Node:
             print("Invalid node id")
 
     def receive_messages(self):
+        # receive messages from other nodes
         while True:
             data, addr = self.sock.recvfrom(1024)
             message = data.decode()
