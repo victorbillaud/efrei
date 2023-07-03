@@ -22,11 +22,9 @@ if __name__ == "__main__":
 
     node = Node(host, port, total_nodes, node_id, username, password)
 
-    # Add other nodes (you might want to make this more dynamic)
+    # Add all nodes to the list of nodes
     for i in range(total_nodes):
-        other_port = base_port + i
-        if other_port != port:
-            node.add_node((host, other_port))
+        node.add_node((host, base_port + i))
 
     node.handle_auth_response()  # Authenticate with the auth server
 
