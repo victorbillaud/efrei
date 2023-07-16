@@ -31,7 +31,8 @@ class Node:
     def broadcast_message(self, message):
         # send the message to all nodes
         self.vector_clock[self.node_id] += 1
-        message = str(self.vector_clock) + "|" + message
+        deps = self.vector_clock.copy()
+        message = str(deps) + "|" + message
         print("\nVector clock:", self.vector_clock)
         print("Broadcasting message:", message)
         for node in self.nodes:
@@ -67,10 +68,30 @@ class Node:
                 self.vector_clock[self.node_id] += 1
                 self.update_vector_clock(eval(vector_clock))
 
-                print("Received message:", message, "from:", addr)
-                print("\nVector clock:", self.vector_clock)
-            else:
-                print("\nReceived invalid message:", message, "from:", addr)
+                # add the received message to the buffer
+                sender = self.nodes.index(addr)
+                deps = eval(vector_clock)
+                self.buffer.append((sender, deps, message))
+
+                # deliver messages from the buffer in the correct order
+                while True:
+                    delivered = False
+                    for msg in self.buffer:
+                        sender, deps, m = msg
+                        if all(
+                            [deps[i] <= self.vector_clock[i] for i in range(len(deps))]
+                        ):
+                            print("Delivered message:", m, "from:", addr)
+                            print("\nVector clock:", self.vector_clock)
+                            self.buffer.remove(msg)
+                            self.vector_clock[sender] += 1
+                            delivered = True
+
+                    if not delivered:
+                        break
+
+        else:
+            print("\nReceived invalid message:", message, "from:", addr)
 
     def is_valid_vector_clock(self, vector_clock_str):
         try:
